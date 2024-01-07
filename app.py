@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.responses import FileResponse
+import time
 
 from pydantic import BaseModel
 from typing import List
@@ -7,6 +8,8 @@ import requests
 
 app = FastAPI()
 
+cache = {}
+cache_duration = 60  # cache duration in seconds
 
 class Item(BaseModel):
     item_id: int
@@ -20,36 +23,24 @@ class ArbitrageData(BaseModel):
     sellPrice: float
     profit: float
 
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello World"}
+@app.get("/get-arbitrage-data")
+async def get_arbitrage_data(page: int = Query(1, alias="page"), page_size: int = Query(10, alias="page_size")):
+    current_time = time.time()
+    cached_data = cache.get('data')
 
+    # Check if cached data is available and not expired
+    if cached_data and current_time - cached_data['time'] < cache_duration:
+        data = cached_data['data']
+    else:
+        url = "https://crypto-arbitrage-scanner1.p.rapidapi.com/arbitrage/"
+        headers = {
+            "X-RapidAPI-Key": "your-api-key",
+            "X-RapidAPI-Host": "crypto-arbitrage-scanner1.p.rapidapi.com"
+        }
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        cache['data'] = {'data': data, 'time': current_time}
 
-# @app.get('/favicon.ico', include_in_schema=False)
-# async def favicon():
-#     return FileResponse('favicon.ico')
-
-
-# @app.get("/item/{item_id}")
-# async def read_item(item_id: int):
-#     return {"item_id": item_id}
-
-
-# @app.get("/items/")
-# async def list_items():
-#     return [{"item_id": 1, "name": "Foo"}, {"item_id": 2, "name": "Bar"}]
-
-
-# @app.post("/items/")
-# async def create_item(item: Item):
-#     return item
-
-@app.get("/get-arbitrage-data", response_model=List[ArbitrageData])
-async def get_arbitrage_data():
-    url = "https://crypto-arbitrage-scanner1.p.rapidapi.com/arbitrage/"
-    headers = {
-        "X-RapidAPI-Key": "e425c2f704mshad63aedb69abd7bp1d6e6ejsn36df2e9115d1",
-        "X-RapidAPI-Host": "crypto-arbitrage-scanner1.p.rapidapi.com"
-    }
-    response = requests.get(url, headers=headers)
-    return response.json()
+    start = (page - 1) * page_size
+    end = start + page_size
+    return data[start:end]

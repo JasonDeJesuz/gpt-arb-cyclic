@@ -27,7 +27,7 @@ class ArbitrageData(BaseModel):
 async def get_arbitrage_data(page: int = Query(1, alias="page"), page_size: int = Query(10, alias="page_size")):
     url = "https://crypto-arbitrage-scanner1.p.rapidapi.com/arbitrage/"
     headers = {
-        "X-RapidAPI-Key": "your-api-key",
+        "X-RapidAPI-Key": "e425c2f704mshad63aedb69abd7bp1d6e6ejsn36df2e9115d1",
         "X-RapidAPI-Host": "crypto-arbitrage-scanner1.p.rapidapi.com"
     }
     response = requests.get(url, headers=headers)

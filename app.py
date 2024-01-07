@@ -11,6 +11,14 @@ class Item(BaseModel):
     item_id: int
 
 
+class ArbitrageData(BaseModel):
+    coin: str
+    buyAt: str
+    buyPrice: float
+    sellAt: str
+    sellPrice: float
+    profit: float
+
 # @app.get("/")
 # async def root():
 #     return {"message": "Hello World"}
@@ -35,7 +43,7 @@ class Item(BaseModel):
 # async def create_item(item: Item):
 #     return item
 
-@app.get("/get-arbitrage-data")
+@app.get("/get-arbitrage-data", response_model=List[ArbitrageData])
 async def get_arbitrage_data():
     url = "https://crypto-arbitrage-scanner1.p.rapidapi.com/arbitrage/"
     headers = {

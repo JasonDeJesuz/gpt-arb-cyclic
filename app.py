@@ -33,8 +33,12 @@ async def get_arbitrage_data(page: int = Query(1, alias="page"), page_size: int 
     response = requests.get(url, headers=headers)
     data = response.json()
 
+    print(f'fuck {data}')
+
     start = (page - 1) * page_size
     end = start + page_size
+
+    print(f'start: {start} end: {end}')
 
     # Ensure slicing is done within the bounds of the list
     paginated_data = data[max(0, start):min(end, len(data))]
